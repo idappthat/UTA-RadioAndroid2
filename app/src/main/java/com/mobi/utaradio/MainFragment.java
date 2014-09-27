@@ -35,6 +35,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     static ImageView musicAlbumImage;
     private ImageButton btnPlay, btnLike, btnDislike, btnShare;
 
+    private Timer myTimer;
     private MediaPlayer mPlayer = new MediaPlayer();
 
     public MainFragment() {
@@ -76,7 +77,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             mPlayer.setDataSource("rtsp://webmedia-2.uta.edu:1935/uta_radio/live");
             mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             //DEVELOPMENT CHOICE: timer waits 10 to get the album art
-            Timer myTimer = new Timer();
+            myTimer = new Timer();
 //        Parameters
 //        task  the task to schedule.
 //        delay  amount of time in milliseconds before first execution.
@@ -84,7 +85,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             myTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    new LoadDataFromXML().execute("http://radio.uta.edu/_php/nowplaying.php");
+                updateSongInfo();
                 }
             }, 0, 10000);
         } catch (IllegalArgumentException e) {
@@ -118,10 +119,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     mPlayer.pause();
                     btnPlay.setImageResource(R.drawable.play);
                 } else {
-                    //play + change button image to play
+                    //play + change button image to play + updateSongInfo
                     mPlayer.start();
                     btnPlay.setImageResource(R.drawable.pause);
-
+                    updateSongInfo();
                 }
 
                 break;
@@ -145,5 +146,35 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
                 break;
         }
+    }
+
+    /**
+     * Pause getting the album info
+     */
+    @Override
+    public void onPause() {
+        myTimer.cancel();
+        myTimer.purge();
+        myTimer = null;
+        super.onPause();
+    }
+
+    /**
+     * Resume getting the album art
+     */
+    @Override
+    public void onResume() {
+        myTimer = new Timer();
+        myTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                updateSongInfo();
+            }
+        }, 0, 10000);
+        super.onResume();
+    }
+
+    void updateSongInfo(){
+        new LoadDataFromXML().execute("http://radio.uta.edu/_php/nowplaying.php");
     }
 }
