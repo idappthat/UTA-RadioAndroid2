@@ -21,7 +21,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/music_album_imageview"
         android:src="@drawable/album"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:minHeight="300dp"
+        android:minWidth="300dp" />
 
     <LinearLayout
         android:orientation="vertical"

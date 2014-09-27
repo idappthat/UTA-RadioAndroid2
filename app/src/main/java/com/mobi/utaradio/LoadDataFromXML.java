@@ -64,9 +64,10 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
     protected void onPostExecute(String result) {
         String song = hxl.getSong();
         String artist = hxl.getArtist();
+        String album = hxl.getAlbum();
         MainFragment.musicTitle.setText(song);
         MainFragment.musicArtist.setText(artist);
-
+        MainFragment.musicAlbum.setText(album);
 
         Log.d("USER", "We got song: " + song + " by: " + artist);
 
@@ -78,8 +79,11 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
         private String songNameString;
         private String artistNameString;
+        private String albumNameString;
+
         private boolean songName= false;
         private boolean artistName = false;
+        private boolean albumName = false;
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -91,6 +95,10 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             else if (localName.equals("artist"))
             {
                 artistName = true;
+            }
+            else if (localName.equals("Album"))
+            {
+                albumName = true;
             }
 
         }
@@ -107,13 +115,20 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 artistName = false;
                 artistNameString = new String(ch, start, length);
 
+            } else if(albumName){
+
+                albumName = false;
+                albumNameString = new String(ch, start, length);
+
             }
         }
 
         public String getSong() {
             return this.songNameString;
         }
-
+        public String getAlbum() {
+            return this.albumNameString;
+        }
         public String getArtist() {
             return this.artistNameString;
         }
@@ -196,7 +211,7 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             String artist = params[1];
 //            debugging
 //            artist = "coldplay";
-//            track = "clocks";
+//            track = "yellow";
 
             track = track.replace(" ", "%20");
             artist = artist.replace(" ", "%20");
@@ -204,7 +219,9 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             Log.d("DEBUG", track + artist);
 
             try {
-                doc = downloadDocumentFromInternet("http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=7f8d036638619be79d49391d8dbe2d11&artist="+artist+"&track="+track+"&format=json");
+                String url = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=7f8d036638619be79d49391d8dbe2d11&artist="+artist+"&track="+track+"&format=json";
+                Log.d("DEBUG", url);
+                doc = downloadDocumentFromInternet(url);
             } catch (Exception e) {
                 Log.d("USER", "Error in getArtData: " + e.toString());
             }
