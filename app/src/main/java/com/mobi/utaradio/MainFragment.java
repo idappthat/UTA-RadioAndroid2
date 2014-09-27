@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Cameron on 9/24/2014.
@@ -68,8 +71,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         try {
             mPlayer.setDataSource("rtsp://webmedia-2.uta.edu:1935/uta_radio/live");
             mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            new LoadDataFromXML().execute("http://radio.uta.edu/_php/nowplaying.php");
-
+            //DEVELOPMENT CHOICE: timer waits 10 to get the album art
+            Timer myTimer = new Timer();
+//        Parameters
+//        task  the task to schedule.
+//        delay  amount of time in milliseconds before first execution.
+//        period  amount of time in milliseconds between subsequent executions.
+            myTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    new LoadDataFromXML().execute("http://radio.uta.edu/_php/nowplaying.php");
+                }
+            }, 0, 10000);
         } catch (IllegalArgumentException e) {
             Log.d("DEBUG", e.toString());
         } catch (SecurityException e) {

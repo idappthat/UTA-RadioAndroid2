@@ -26,6 +26,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.TimerTask;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -138,7 +140,6 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
     public class XmlParser{
 
-        //static final String baseURL = "http://radio.uta.edu/mediaplayer/nowplaying.xml";
         public String information;
 
         public String getInfo()
@@ -245,13 +246,9 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 downloadImage.execute(imageURL);
             } catch (JSONException e){
                 Log.d("DEBUG", e.toString());
+                MainFragment.musicAlbumImage.setImageResource(R.drawable.vinyl_records);
             }
-
-
-           // JSONArray json = new JSONArray()
-
         }
-
     }
 
 
@@ -270,6 +267,7 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 image = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
                 Log.e("DEBUG", e.getMessage());
+                bmImage.setImageResource(R.drawable.vinyl_records);
             }
             return image;
         }
