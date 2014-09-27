@@ -1,13 +1,88 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/activity_horizontal_margin"
-    tools:context=".MainActivity$PlaceholderFragment">
+    tools:context=".MainActivity$MusicFragment"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/album_blur">
 
-    <TextView
-        android:text="@string/hello_world"
+    <ImageButton
+        android:background="@null"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:id="@+id/music_share_imagebutton"
+        android:src="@drawable/ic_action_social_share"
+        android:layout_gravity="right"/>
 
-</RelativeLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/music_album_imageview"
+        android:src="@drawable/album"
+        android:layout_weight="1"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Yellow"
+            android:id="@+id/music_song_textview"
+            android:textSize="28sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coldplay"
+            android:id="@+id/music_artist_textview"
+            android:textColor="@color/white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Parachutes"
+            android:id="@+id/music_album_textview"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <ImageButton
+            android:background="@null"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/music_dislike_imagebutton"
+            android:src="@drawable/thumb"
+            android:rotation="180"/>
+
+        <ImageButton
+            android:background="@null"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/music_play_imagebutton"
+            android:src="@drawable/play"
+            android:layout_marginLeft="@dimen/music_nav_margin"
+            android:layout_marginRight="@dimen/music_nav_margin"/>
+
+        <ImageButton
+            android:background="@null"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/music_like_imagebutton"
+            android:src="@drawable/thumb" />
+    </LinearLayout>
+
+</LinearLayout>
