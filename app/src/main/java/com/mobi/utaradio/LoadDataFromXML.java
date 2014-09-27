@@ -214,9 +214,13 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 //            artist = "coldplay";
 //            track = "yellow";
 
-            track = track.replace(" ", "%20");
-            artist = artist.replace(" ", "%20");
-
+            if(track != null)
+            {
+                track = track.replace(" ", "%20");
+            }
+            if (artist != null){
+                artist = artist.replace(" ", "%20");
+            }
             Log.d("DEBUG", track + artist);
 
             try {
