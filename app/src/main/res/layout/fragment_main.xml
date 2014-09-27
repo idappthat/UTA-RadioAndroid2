@@ -33,25 +33,28 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Yellow"
+            android:text=""
             android:id="@+id/music_song_textview"
             android:textSize="28sp"
             android:textColor="@color/white"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textAlignment="center"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Coldplay"
+            android:text=""
             android:id="@+id/music_artist_textview"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white"
+            android:textAlignment="center"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Parachutes"
+            android:text=""
             android:id="@+id/music_album_textview"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white"
+            android:textAlignment="center"/>
     </LinearLayout>
 
     <LinearLayout
