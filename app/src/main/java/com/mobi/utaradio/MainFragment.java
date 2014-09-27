@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +25,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     private Typeface quicksand;
     static TextView musicTitle, musicArtist, musicAlbum;
+    static ImageView musicAlbumImage;
     private ImageButton btnPlay, btnLike, btnDislike, btnShare;
 
     private MediaPlayer mPlayer = new MediaPlayer();
@@ -44,6 +46,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         btnLike = (ImageButton) rootView.findViewById(R.id.music_like_imagebutton);
         btnDislike = (ImageButton) rootView.findViewById(R.id.music_dislike_imagebutton);
         btnShare = (ImageButton) rootView.findViewById(R.id.music_share_imagebutton);
+        musicAlbumImage = (ImageView) rootView.findViewById(R.id.music_album_imageview);
 
         /* Set UI Element attributes */
         musicTitle.setTypeface(quicksand);
@@ -79,6 +82,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         try {
             mPlayer.prepare();
             mPlayer.start();
+            btnPlay.setImageResource(R.drawable.pause);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         } catch (IOException e){
@@ -91,14 +95,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.music_play_imagebutton:
-                Toast.makeText(v.getContext(), "Play", Toast.LENGTH_SHORT).show();
                 if (mPlayer.isPlaying() )
                 {
                     //pause + change button image to pause
                     mPlayer.pause();
+                    btnPlay.setImageResource(R.drawable.play);
                 } else {
                     //play + change button image to play
                     mPlayer.start();
+                    btnPlay.setImageResource(R.drawable.pause);
+
                 }
 
                 break;

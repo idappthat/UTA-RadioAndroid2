@@ -1,6 +1,12 @@
 package com.mobi.utaradio;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -31,6 +37,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -62,7 +69,8 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
 
         Log.d("USER", "We got song: " + song + " by: " + artist);
-        //new getArtData().execute("");
+
+        new getArtData().execute(song, artist);
     }
 
 
@@ -155,9 +163,6 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
      */
     private class getArtData extends AsyncTask<String, Integer, String>{
 
-        String apiKey;
-        String songName;
-        String artistName;
 
         private String downloadDocumentFromInternet(String URL) throws Exception{
             //making an http client
@@ -170,10 +175,7 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             HttpEntity httpEntity = httpResponse.getEntity();
             //making an inputStram from response entity
             InputStream inputStream = httpEntity.getContent();
-
-            //the following section covers converting the input stream into a string
-
-            //making an input stram reader, also called a BufferedReader
+            //making an input stream reader, also called a BufferedReader
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             //String builder, Duh!
             StringBuilder sb = new StringBuilder();
@@ -189,10 +191,20 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
         @Override
         protected String doInBackground(String... params) {
-            //Map gsonMap;
             String doc = null;
+            String track = params[0];
+            String artist = params[1];
+//            debugging
+//            artist = "coldplay";
+//            track = "clocks";
+
+            track = track.replace(" ", "%20");
+            artist = artist.replace(" ", "%20");
+
+            Log.d("DEBUG", track + artist);
+
             try {
-                doc = downloadDocumentFromInternet("http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=7f8d036638619be79d49391d8dbe2d11&artist=coldplay&track=clocks&format=json");
+                doc = downloadDocumentFromInternet("http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=7f8d036638619be79d49391d8dbe2d11&artist="+artist+"&track="+track+"&format=json");
             } catch (Exception e) {
                 Log.d("USER", "Error in getArtData: " + e.toString());
             }
@@ -202,8 +214,52 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
         @Override
         protected void onPostExecute(String result) {
             //parse json file
+            Log.d("DEBUG", result);
+            try{
+                //we parse the data here
+                JSONObject json = new JSONObject(result);
+                JSONObject track = json.getJSONObject("track");
+                JSONObject album = track.getJSONObject("album");
+                JSONArray image = album.getJSONArray("image");
+                JSONObject thirdImage = image.getJSONObject(image.length()-1);  //always get the last image
+                String imageURL = thirdImage.get("#text").toString();
+                Log.d("DEBUG", imageURL);
+                DownloadImageTask downloadImage = new DownloadImageTask(MainFragment.musicAlbumImage);
+                downloadImage.execute(imageURL);
+            } catch (JSONException e){
+                Log.d("DEBUG", e.toString());
+            }
+
+
+           // JSONArray json = new JSONArray()
+
         }
 
+    }
+
+
+    private class DownloadImageTask extends AsyncTask<String, Void,Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap image = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                image = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("DEBUG", e.getMessage());
+            }
+            return image;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
     }
 
 }
