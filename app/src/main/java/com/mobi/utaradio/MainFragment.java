@@ -17,17 +17,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.List;
-=======
 import java.io.IOException;
-<<<<<<< HEAD
 import java.util.Timer;
 import java.util.TimerTask;
-=======
->>>>>>> origin/master
->>>>>>> origin/master
 
 /**
  * Created by Cameron on 9/24/2014.
