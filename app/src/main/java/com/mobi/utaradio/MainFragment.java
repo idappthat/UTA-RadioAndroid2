@@ -1,11 +1,13 @@
 package com.mobi.utaradio;
 
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
 import android.graphics.Typeface;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +15,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.List;
+import java.io.IOException;
 
 /**
  * Created by Cameron on 9/24/2014.
@@ -21,8 +23,10 @@ import java.util.List;
 public class MainFragment extends Fragment implements View.OnClickListener {
 
     private Typeface quicksand;
-    private TextView musicTitle, musicArtist, musicAlbum;
+    static TextView musicTitle, musicArtist, musicAlbum;
     private ImageButton btnPlay, btnLike, btnDislike, btnShare;
+
+    private MediaPlayer mPlayer = new MediaPlayer();
 
     public MainFragment() {
     }
@@ -31,7 +35,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
         /* Link to UI Elements */
         quicksand = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Quicksand-Regular.ttf");
         musicTitle = (TextView) rootView.findViewById(R.id.music_song_textview);
@@ -55,11 +58,49 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         return rootView;
     }
 
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        try {
+            mPlayer.setDataSource("rtsp://webmedia-2.uta.edu:1935/uta_radio/live");
+            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            new LoadDataFromXML().execute("http://radio.uta.edu/_php/nowplaying.php");
+
+        } catch (IllegalArgumentException e) {
+            Log.d("DEBUG", e.toString());
+        } catch (SecurityException e) {
+            Log.d("DEBUG", e.toString());
+        } catch (IllegalStateException e) {
+            Log.d("DEBUG", e.toString());
+        } catch (IOException e){
+            Log.d("DEBUG", e.toString());
+        }
+        try {
+            mPlayer.prepare();
+            mPlayer.start();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+    }
+
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.music_play_imagebutton:
                 Toast.makeText(v.getContext(), "Play", Toast.LENGTH_SHORT).show();
+                if (mPlayer.isPlaying() )
+                {
+                    //pause + change button image to pause
+                    mPlayer.pause();
+                } else {
+                    //play + change button image to play
+                    mPlayer.start();
+                }
+
                 break;
             case R.id.music_like_imagebutton:
                 Toast.makeText(v.getContext(), "Like", Toast.LENGTH_SHORT).show();
