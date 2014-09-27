@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -75,28 +76,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 shareIntent.setType("text/plain");
                 shareIntent.putExtra(Intent.EXTRA_TEXT, message);
                 startActivity(Intent.createChooser(shareIntent, contextTitle));
-
-/*
-
-                boolean facebookAppFound = false;
-                List<ResolveInfo> matches = getActivity().getPackageManager().queryIntentActivities(shareIntent, 0);
-                for (ResolveInfo info : matches) {
-                    if (info.activityInfo.packageName.toLowerCase().startsWith("com.facebook.katana")) {
-                        shareIntent.setPackage(info.activityInfo.packageName);
-                        facebookAppFound = true;
-                        break;
-                    }
-                }*/
-
-                /*if (!facebookAppFound) {
-                    String sharerUrl = "https://www.facebook.com/sharer/sharer.php?u=" + urlToShare;
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
-                }*/
-
-                //startActivity(Intent.createChooser(shareIntent, contextTitle));
-
-                /*ShareDialog shareDialog = new ShareDialog(v.getContext());
-                shareDialog.show();*/
+                
+                //ShareDialog shareDialog = new ShareDialog(v.getContext(), matches);
+                //shareDialog.show();
 
                 break;
         }
