@@ -1,9 +1,15 @@
 package com.mobi.utaradio;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,8 +20,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.mobi.utaradio.util.FastBlur;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +43,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     static TextView musicTitle, musicArtist, musicAlbum;
     static ImageView musicAlbumImage;
     private ImageButton btnPlay, btnLike, btnDislike, btnShare;
+    public LinearLayout lLayout;
 
     private Timer myTimer;
-    private MediaPlayer mPlayer = new MediaPlayer();
+    private MediaPlayer mPlayer;
 
     public MainFragment() {
     }
@@ -47,6 +57,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         /* Link to UI Elements */
         quicksand = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Quicksand-Regular.ttf");
+        lLayout = (LinearLayout) rootView.findViewById(R.id.music_layout);
         musicTitle = (TextView) rootView.findViewById(R.id.music_song_textview);
         musicArtist = (TextView) rootView.findViewById(R.id.music_artist_textview);
         musicAlbum = (TextView) rootView.findViewById(R.id.music_album_textview);
@@ -66,16 +77,34 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         btnDislike.setOnClickListener(this);
         btnShare.setOnClickListener(this);
 
+        blur(((BitmapDrawable)musicAlbumImage.getDrawable()).getBitmap() ,lLayout);
+
         return rootView;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         try {
-            mPlayer.setDataSource("rtsp://webmedia-2.uta.edu:1935/uta_radio/live");
+            mPlayer = new MediaPlayer();
             mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mPlayer.setDataSource("rtsp://webmedia-2.uta.edu:1935/uta_radio/live");
+            mPlayer.prepareAsync(); //Built-in media player AsyncTask
+            mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    if(mp == mPlayer) {
+                        mPlayer.start();
+                        btnPlay.setImageResource(R.drawable.pause);
+                    }
+                }
+            });
+
             //DEVELOPMENT CHOICE: timer waits 10 to get the album art
             myTimer = new Timer();
 //        Parameters
@@ -85,7 +114,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             myTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                updateSongInfo();
+                    updateSongInfo();
                 }
             }, 0, 10000);
         } catch (IllegalArgumentException e) {
@@ -97,22 +126,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         } catch (IOException e){
             Log.d("DEBUG", e.toString());
         }
-        try {
-            mPlayer.prepare();
-            mPlayer.start();
-            btnPlay.setImageResource(R.drawable.pause);
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-
     }
 
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.music_play_imagebutton:
+                Toast.makeText(v.getContext(), "Pressed", Toast.LENGTH_SHORT).show();
                 if (mPlayer.isPlaying() )
                 {
                     //pause + change button image to pause
@@ -176,5 +196,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     void updateSongInfo(){
         new LoadDataFromXML().execute("http://radio.uta.edu/_php/nowplaying.php");
+    }
+
+    private void blur(Bitmap bg, View view) {
+        Bitmap overlay = Bitmap.createScaledBitmap(bg, 150, 150, false);
+        overlay = FastBlur.doBlur(overlay, 50, true);
+        view.setBackgroundDrawable(new BitmapDrawable(getActivity().getResources(), overlay));
     }
 }
