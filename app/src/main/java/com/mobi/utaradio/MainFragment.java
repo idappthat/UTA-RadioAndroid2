@@ -212,9 +212,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }, 0, 10000);
         } else {
             // we kill the current timer
-            myTimer.cancel();
-            myTimer.purge();
-            myTimer = null;
+           if(myTimer != null) {
+               myTimer.cancel();
+               myTimer.purge();
+               myTimer = null;
+           }
         }
     }
 
