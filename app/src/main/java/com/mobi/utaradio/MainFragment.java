@@ -14,18 +14,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import com.mobi.utaradio.util.FastBlur;
 
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
-
 
 
 /**
@@ -38,9 +40,14 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     static ImageView musicAlbumImage;
     private ImageButton btnPlay, btnLike, btnDislike, btnShare;
     static LinearLayout lLayout;
+    private ViewSwitcher viewSwitcher;
+
 
     private Timer myTimer;
     private MediaPlayer mPlayer;
+
+    static boolean allowAlbumImageRoation = true;    // THIS ALLOWS ROTATION OF THE ALBUM ART
+    private Animation rotationAnimation;    //record rotation animation
 
     public MainFragment() {
     }
@@ -60,13 +67,25 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         btnLike = (ImageButton) rootView.findViewById(R.id.music_like_imagebutton);
         btnDislike = (ImageButton) rootView.findViewById(R.id.music_dislike_imagebutton);
         btnShare = (ImageButton) rootView.findViewById(R.id.music_share_imagebutton);
-        musicAlbumImage = (ImageView) rootView.findViewById(R.id.music_album_imageview);
 
+        //view switcher and its animation
+        viewSwitcher = (ViewSwitcher) rootView.findViewById(R.id.viewswitcher);
+        Animation fadeIn = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), android.R.anim.fade_in);
+        Animation fadeOut = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), android.R.anim.fade_out);
+        viewSwitcher.setInAnimation(fadeIn);
+        viewSwitcher.setOutAnimation(fadeOut);
+
+        //setting the album image and its animation
+        musicAlbumImage = (ImageView) rootView.findViewById(R.id.music_album_imageview);
+        rotationAnimation = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.rotate);
+        btnPlay.startAnimation(rotationAnimation);
+        musicAlbumImage.startAnimation(rotationAnimation);
         /* Set UI Element attributes */
         musicTitle.setTypeface(quicksand);
         musicArtist.setTypeface(quicksand);
         musicAlbum.setTypeface(quicksand);
 
+        musicAlbumImage.setOnClickListener(this);
         btnPlay.setOnClickListener(this);
         btnLike.setOnClickListener(this);
         btnDislike.setOnClickListener(this);
@@ -94,9 +113,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
-                    if(mp == mPlayer) {
-                        mPlayer.start();
-                        btnPlay.setImageResource(R.drawable.pause);
+                    if (mp == mPlayer) {
+                        mPlayer.start();    //starting the player
+                        btnPlay.setImageResource(R.drawable.pause); //showing the pause button
+                        viewSwitcher.showNext();    //moving to the player controls
                     }
                 }
             });
@@ -119,17 +139,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             Log.d("DEBUG", e.toString());
         } catch (IllegalStateException e) {
             Log.d("DEBUG", e.toString());
-        } catch (IOException e){
+        } catch (IOException e) {
             Log.d("DEBUG", e.toString());
         }
     }
 
     @Override
     public void onClick(View v) {
-        switch(v.getId()) {
+        switch (v.getId()) {
             case R.id.music_play_imagebutton:
-                if (mPlayer.isPlaying() )
-                {
+                if (mPlayer.isPlaying()) {
                     //pause + change button image to pause
                     mPlayer.pause();
                     btnPlay.setImageResource(R.drawable.play);
@@ -161,6 +180,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 //shareDialog.show();
 
                 break;
+            case R.id.music_album_imageview:
+                //this is an easter egg
+                if(allowAlbumImageRoation && rotationAnimation.hasEnded()){
+                    musicAlbumImage.startAnimation(rotationAnimation);
+                }
         }
     }
 
@@ -190,7 +214,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         super.onResume();
     }
 
-    void updateSongInfo(){
+    void updateSongInfo() {
         new LoadDataFromXML().execute("http://radio.uta.edu/_php/nowplaying.php");
     }
 }

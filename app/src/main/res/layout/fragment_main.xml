@@ -67,11 +67,24 @@
             android:textAlignment="center"/>
     </LinearLayout>
 
+    <ViewSwitcher
+        android:id="@+id/viewswitcher"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.Holo.ProgressBar.Large"
+            android:layout_gravity="center"
+            android:layout_marginRight="5dp" />
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
+
 
         <ImageButton
             android:background="@null"
@@ -97,5 +110,7 @@
             android:id="@+id/music_like_imagebutton"
             android:src="@drawable/thumb" />
     </LinearLayout>
+
+    </ViewSwitcher>
 
 </LinearLayout>

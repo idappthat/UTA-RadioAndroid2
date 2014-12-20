@@ -253,6 +253,9 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 //something went wrong
                 //set the album art to the vinyl image
                 MainFragment.musicAlbumImage.setImageResource(R.drawable.vinyl_records);
+                //Enable on touch rotation of the album art
+                MainFragment.allowAlbumImageRoation = false;
+                //adding a red hue
                 MainFragment.lLayout.getBackground().setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
             }
         }
@@ -283,6 +286,9 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             //set the album art to the new image
             bmImage.setImageBitmap(result);
             //set the background to the new color
+
+            //disable album art on touch rotation
+            MainFragment.allowAlbumImageRoation = false;
 
             Palette.generateAsync(result, new Palette.PaletteAsyncListener() {
                 public void onGenerated(Palette palette) {
