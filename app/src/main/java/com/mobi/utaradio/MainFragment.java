@@ -2,19 +2,15 @@ package com.mobi.utaradio;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,8 +22,6 @@ import android.widget.Toast;
 
 import com.mobi.utaradio.util.FastBlur;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,7 +37,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     static TextView musicTitle, musicArtist, musicAlbum;
     static ImageView musicAlbumImage;
     private ImageButton btnPlay, btnLike, btnDislike, btnShare;
-    public LinearLayout lLayout;
+    static LinearLayout lLayout;
 
     private Timer myTimer;
     private MediaPlayer mPlayer;
@@ -59,6 +53,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         quicksand = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Quicksand-Regular.ttf");
         lLayout = (LinearLayout) rootView.findViewById(R.id.music_layout);
         musicTitle = (TextView) rootView.findViewById(R.id.music_song_textview);
+        musicTitle.setSelected(true);
         musicArtist = (TextView) rootView.findViewById(R.id.music_artist_textview);
         musicAlbum = (TextView) rootView.findViewById(R.id.music_album_textview);
         btnPlay = (ImageButton) rootView.findViewById(R.id.music_play_imagebutton);
@@ -77,7 +72,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         btnDislike.setOnClickListener(this);
         btnShare.setOnClickListener(this);
 
-        blur(((BitmapDrawable)musicAlbumImage.getDrawable()).getBitmap() ,lLayout);
+        lLayout.getBackground().setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
+        //blur(((BitmapDrawable)musicAlbumImage.getDrawable()).getBitmap() ,lLayout);
 
         return rootView;
     }
@@ -105,7 +101,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 }
             });
 
-            //DEVELOPMENT CHOICE: timer waits 10 to get the album art
+            //DEVELOPMENT CHOICE: timer waits 10 seconds to get the album art
             myTimer = new Timer();
 //        Parameters
 //        task  the task to schedule.
@@ -132,7 +128,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.music_play_imagebutton:
-                Toast.makeText(v.getContext(), "Pressed", Toast.LENGTH_SHORT).show();
                 if (mPlayer.isPlaying() )
                 {
                     //pause + change button image to pause
@@ -160,7 +155,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 shareIntent.setType("text/plain");
                 shareIntent.putExtra(Intent.EXTRA_TEXT, message);
                 startActivity(Intent.createChooser(shareIntent, contextTitle));
-                
+
+
                 //ShareDialog shareDialog = new ShareDialog(v.getContext(), matches);
                 //shareDialog.show();
 
@@ -196,11 +192,5 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     void updateSongInfo(){
         new LoadDataFromXML().execute("http://radio.uta.edu/_php/nowplaying.php");
-    }
-
-    private void blur(Bitmap bg, View view) {
-        Bitmap overlay = Bitmap.createScaledBitmap(bg, 150, 150, false);
-        overlay = FastBlur.doBlur(overlay, 50, true);
-        view.setBackgroundDrawable(new BitmapDrawable(getActivity().getResources(), overlay));
     }
 }

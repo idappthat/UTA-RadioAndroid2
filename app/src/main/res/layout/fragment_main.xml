@@ -41,6 +41,13 @@
             android:textSize="28sp"
             android:textColor="@color/white"
             android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:freezesText="true"
             android:textAlignment="center"/>
 
         <TextView
