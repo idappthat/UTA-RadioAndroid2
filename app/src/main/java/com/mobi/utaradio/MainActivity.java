@@ -1,24 +1,9 @@
 package com.mobi.utaradio;
 
-import android.graphics.Typeface;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
-import android.widget.TextView;
-
-import java.io.IOException;
-import java.lang.reflect.Type;
-
+import com.parse.Parse;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -26,6 +11,9 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //initialize parse
+        Parse.initialize(this, "5qlRd6jeJWmm6mnixs64t4RWPG6cX6z9wt2heHpS", "ncvLb5cHHjH8Iev1cckMq5hYzc7WFhnHDZJSQBIc");
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()

@@ -38,8 +38,9 @@ import android.widget.ImageView;
 
 /**
  * Created by Zedd on 9/26/2014.
- * This class handles getting the song information
- * Status WIP
+ * This class handles getting the song information such as title and singer
+ * it also handles getting album art
+ * Status ALMOST done
  */
 public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
@@ -60,22 +61,28 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
         String song = hxl.getSong();
         String artist = hxl.getArtist();
         String album = hxl.getAlbum();
-        //set to the new values
-        MainFragment.musicTitle.setText(song);
-        MainFragment.musicArtist.setText(artist);
-        MainFragment.musicAlbum.setText(album);
-        boolean getNewData = true;
+        boolean getNewData = false;
 
         //check if data is different, then get the album art
-        if (song != null && !song.equals(MainFragment.musicTitle.getText().toString())) {
+        if (song != null && MainFragment.musicTitle.getText()!= null && !song.equals(MainFragment.musicTitle.getText().toString())) {
             getNewData = true;
-        } else if (artist != null && !artist.equals(MainFragment.musicArtist.getText().toString())) {
+        } else if (artist != null && MainFragment.musicArtist.getText()!= null && !artist.equals(MainFragment.musicArtist.getText().toString())) {
             getNewData = true;
-        } else if (album != null && !album.equals(MainFragment.musicAlbum.getText().toString())) {
+        } else if (album != null && MainFragment.musicAlbum.getText()!= null && !album.equals(MainFragment.musicAlbum.getText().toString())) {
             getNewData = true;
         }
 
-        if (getNewData) {
+        if (getNewData) { //ok we got a new song
+
+            //we publish the rating to the data base
+            MainFragment.publishRating();
+            //reset the like status
+            MainFragment.resetTrackLiked();
+            //set to the new values
+            MainFragment.musicTitle.setText(song);
+            MainFragment.musicArtist.setText(artist);
+            MainFragment.musicAlbum.setText(album);
+            //debug info
             Log.d("USER", "We got song: " + song + " by: " + artist);
             //get a new album image
             new getArtData().execute(song, artist);
@@ -163,8 +170,6 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 HandlingXMLStuff xmlHandler = (HandlingXMLStuff) XMLHandler;
                 xr.setContentHandler(xmlHandler);
                 xr.parse(new InputSource(website.openStream()));
-                //this.information = xmlHandler.getInfomation();
-
             } catch (Exception e) {
                 Log.d("USER", e.toString());
             }
@@ -254,7 +259,7 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 //set the album art to the vinyl image
                 MainFragment.musicAlbumImage.setImageResource(R.drawable.vinyl_records);
                 //Enable on touch rotation of the album art
-                MainFragment.allowAlbumImageRoation = false;
+                MainFragment.allowAlbumImageRoation = true;
                 //adding a red hue
                 MainFragment.lLayout.getBackground().setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
             }
