@@ -2,6 +2,7 @@ package com.mobi.utaradio;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 
@@ -29,6 +30,7 @@ import org.xml.sax.XMLReader;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Random;
 
 
 import android.support.v7.graphics.Palette;
@@ -260,8 +262,16 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 MainFragment.musicAlbumImage.setImageResource(R.drawable.vinyl_records);
                 //Enable on touch rotation of the album art
                 MainFragment.allowAlbumImageRoation = true;
-                //adding a red hue
-                MainFragment.lLayout.getBackground().setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
+
+                //we make a random default color
+                Random rand = new Random();
+                int r = rand.nextInt();
+                int g = rand.nextInt();
+                int b = rand.nextInt();
+                final int randomColor = Color.rgb(r, g, b);
+
+                //adding a random hue to background
+                MainFragment.lLayout.getBackground().setColorFilter(randomColor, PorterDuff.Mode.MULTIPLY);
             }
         }
     }
@@ -295,10 +305,18 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             //disable album art on touch rotation
             MainFragment.allowAlbumImageRoation = false;
 
+            //we make a random default color
+            Random rand = new Random();
+            int r = rand.nextInt();
+            int g = rand.nextInt();
+            int b = rand.nextInt();
+            final int randomColor = Color.rgb(r, g, b);
+
+            //get image color and apply it to the background
             Palette.generateAsync(result, new Palette.PaletteAsyncListener() {
                 public void onGenerated(Palette palette) {
                     // Do something with colors...
-                    MainFragment.lLayout.getBackground().setColorFilter(palette.getVibrantColor(0xffff0000), PorterDuff.Mode.MULTIPLY);
+                    MainFragment.lLayout.getBackground().setColorFilter(palette.getVibrantColor(randomColor), PorterDuff.Mode.MULTIPLY);
                 }
             });
 

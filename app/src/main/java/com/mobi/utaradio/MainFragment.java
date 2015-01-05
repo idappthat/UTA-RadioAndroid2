@@ -98,7 +98,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         btnShare.setOnClickListener(this);
 
         //add a red hue to the background, christmas theme
-        lLayout.getBackground().setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
+        //lLayout.getBackground().setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
 
         //initializing jump animation used later
         jump = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.jump);
