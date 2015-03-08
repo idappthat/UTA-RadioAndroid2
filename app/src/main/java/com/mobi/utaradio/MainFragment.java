@@ -194,6 +194,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 if (allowAlbumImageRoation && rotationAnimation.hasEnded()) {
                     musicAlbumImage.startAnimation(rotationAnimation);
                 }
+                break;
         }
     }
 

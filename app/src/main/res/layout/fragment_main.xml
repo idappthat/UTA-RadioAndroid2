@@ -9,13 +9,24 @@
     android:padding="@dimen/activity_horizontal_margin"
     tools:context=".MainActivity$MusicFragment">
 
-    <ImageButton
-        android:id="@+id/music_share_imagebutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:background="@null"
-        android:src="@drawable/ic_action_social_share" />
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+
+        <ImageButton
+            android:id="@+id/music_share_imagebutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:background="@null"
+            android:src="@drawable/ic_action_social_share" />
+
+
+        </FrameLayout>
+
+
 
     <ImageView
         android:id="@+id/music_album_imageview"
