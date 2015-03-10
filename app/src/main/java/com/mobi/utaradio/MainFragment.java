@@ -1,12 +1,18 @@
 package com.mobi.utaradio;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -38,6 +44,12 @@ import java.util.TimerTask;
  */
 public class MainFragment extends Fragment implements View.OnClickListener {
 
+    /* Service Stuff */
+    private MusicService musicService;
+    private Intent playIntent;
+    private boolean musicBound = false;
+
+
     private Typeface quicksand;
     static TextView musicTitle, musicArtist, musicAlbum;
     static ImageView musicAlbumImage;
@@ -47,7 +59,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private ViewSwitcher viewSwitcher;
 
     private Timer myTimer;
-    private MediaPlayer mPlayer;
     private Animation jump; //This is a simple jump animation, gives nice feedback
 
     static boolean allowAlbumImageRoation = true;    // THIS ALLOWS ROTATION OF THE ALBUM ART
@@ -109,48 +120,47 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
+
+        if(playIntent == null) {
+            playIntent = new Intent(getActivity().getBaseContext(), MusicService.class);
+            getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+            getActivity().startService(playIntent);
+
+            getActivity().registerReceiver(broadcastReceiver, new IntentFilter(MusicService.BROADCAST_ACTION));
+        }
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        try {
-            mPlayer = new MediaPlayer();
-            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mPlayer.setDataSource("rtsp://webmedia-2.uta.edu:1935/uta_radio/live");
-            mPlayer.prepareAsync(); //Built-in media player AsyncTask
-            mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    if (mp == mPlayer) {
-                        mPlayer.start();    //starting the player
-                        btnPlay.setImageResource(R.drawable.pause); //showing the pause button
-                        viewSwitcher.showNext();    //moving to the player controls
-                    }
-                }
-            });
-
-            //DEVELOPMENT CHOICE: timer waits 10 seconds to get the album art
-            myTimer = new Timer();
-//        Parameters
-//        task  the task to schedule.
-//        delay  amount of time in milliseconds before first execution.
-//        period  amount of time in milliseconds between subsequent executions.
-            myTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    updateSongInfo();
-                }
-            }, 0, 10000);
-        } catch (IllegalArgumentException e) {
-            Log.d("DEBUG", e.toString());
-        } catch (SecurityException e) {
-            Log.d("DEBUG", e.toString());
-        } catch (IllegalStateException e) {
-            Log.d("DEBUG", e.toString());
-        } catch (IOException e) {
-            Log.d("DEBUG", e.toString());
+    private ServiceConnection musicConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+            musicService = binder.getService();
+            musicBound = true;
         }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            musicBound = false;
+        }
+    };
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateUI(intent);
+        }
+    };
+
+    private void updateUI(Intent intent) {
+        int action = intent.getExtras().getInt(MusicService.BROADCAST_ACTION);
+        switch (action) {
+            case MusicService.ACTION_PREPARED:
+                btnPlay.setImageResource(R.drawable.pause);
+                viewSwitcher.showNext();
+                break;
+        }
+
+        Log.e("UPDATE", "New action from service: " + action);
     }
 
     @Override
@@ -158,14 +168,15 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.music_play_imagebutton:
                 v.startAnimation(jump); //make the view jump
-                if (mPlayer.isPlaying()) {
+                Log.e("TEST", " " + musicService.isPlaying());
+                if (musicService.isPlaying()) {
                     //pause + change button image to pause
-                    mPlayer.pause();
+                    musicService.pause();
                     btnPlay.setImageResource(R.drawable.play); //we set the image of the next state
                     enableLoadingContent(false);   //we disable loading song content
                 } else {
                     //play + change button image to play + updateSongInfo
-                    mPlayer.start();
+                    musicService.play();
                     btnPlay.setImageResource(R.drawable.pause); //we set the image of the next state
                     enableLoadingContent(true);     //we enable loading content
                 }
@@ -227,6 +238,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onPause() {
         enableLoadingContent(false);
+        getActivity().unregisterReceiver(broadcastReceiver);
         super.onPause();
     }
 
@@ -237,6 +249,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         enableLoadingContent(true);
         super.onResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        getActivity().stopService(playIntent);
+        musicService = null;
+        super.onDestroy();
     }
 
     void updateSongInfo() {

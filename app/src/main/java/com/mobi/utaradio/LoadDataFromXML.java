@@ -51,7 +51,6 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
     @Override
     protected String doInBackground(String... url) {
-
         XmlParser xp = new XmlParser();
         hxl = new HandlingXMLStuff();
         xp.doInBackground(url[0], hxl);
@@ -89,7 +88,7 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             //get a new album image
             new getArtData().execute(song, artist);
         } else {
-            Log.d("USER", "No new data was acquired");
+            Log.e("USER", "No new data was acquired");
         }
     }
 
@@ -218,9 +217,6 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             String doc = null;
             String track = params[0];
             String artist = params[1];
-//            debugging
-//            artist = "coldplay";
-//            track = "yellow";
 
             if (track != null) {
                 track = track.replace(" ", "%20");
