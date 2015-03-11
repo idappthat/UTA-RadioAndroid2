@@ -125,8 +125,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             playIntent = new Intent(getActivity().getBaseContext(), MusicService.class);
             getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             getActivity().startService(playIntent);
-
-            getActivity().registerReceiver(broadcastReceiver, new IntentFilter(MusicService.BROADCAST_ACTION));
         }
     }
 
@@ -232,9 +230,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    /**
-     * Pause getting the album info
-     */
     @Override
     public void onPause() {
         enableLoadingContent(false);
@@ -242,12 +237,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         super.onPause();
     }
 
-    /**
-     * Resume getting the album art
-     */
     @Override
     public void onResume() {
         enableLoadingContent(true);
+        getActivity().registerReceiver(broadcastReceiver, new IntentFilter(MusicService.BROADCAST_ACTION));
         super.onResume();
     }
 
