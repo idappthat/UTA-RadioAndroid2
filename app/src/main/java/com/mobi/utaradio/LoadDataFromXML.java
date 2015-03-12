@@ -4,6 +4,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 
 import org.json.JSONArray;
@@ -37,6 +40,8 @@ import android.support.v7.graphics.Palette;
 import android.util.Log;
 
 import android.widget.ImageView;
+
+import com.mobi.utaradio.util.Blur;
 
 /**
  * Created by Zedd on 9/26/2014.
@@ -214,24 +219,36 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
         @Override
         protected String doInBackground(String... params) {
+            Log.e("", "");
             String doc = null;
             String track = params[0];
             String artist = params[1];
 
-            if (track != null) {
+            /*if (track != null) {
                 track = track.replace(" ", "%20");
             }
             if (artist != null) {
                 artist = artist.replace(" ", "%20");
             }
-            Log.d("DEBUG", track + artist);
+            Log.d("DEBUG", track + artist);*/
 
             try {
-                String url = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=7f8d036638619be79d49391d8dbe2d11&artist=" + artist + "&track=" + track + "&format=json";
-                Log.d("DEBUG", url);
+                Uri builder = new Uri.Builder()
+                        .scheme("http")
+                        .authority("ws.audioscrobbler.com")
+                        .appendPath("2.0")
+                        .appendQueryParameter("method", "track.getInfo")
+                        .appendQueryParameter("api_key", "7f8d036638619be79d49391d8dbe2d11")
+                        .appendQueryParameter("artist", artist)
+                        .appendQueryParameter("track", track)
+                        .appendQueryParameter("format", "json").build();
+
+
+                String url = builder.toString();
+                Log.e("CHECK", url);
                 doc = downloadDocumentFromInternet(url);
             } catch (Exception e) {
-                Log.d("USER", "Error in getArtData: " + e.toString());
+                Log.e("ALBUM ART", "Error in getArtData: " + e.toString());
             }
             return doc;
         }
@@ -239,9 +256,10 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
         @Override
         protected void onPostExecute(String result) {
             //parse json file
-            Log.d("DEBUG", result);
+            Log.d("ON RESULT", result + " -test");
             try {
                 //we parse the data here
+               // Log.e("Result", result);
                 JSONObject json = new JSONObject(result);
                 JSONObject track = json.getJSONObject("track");
                 JSONObject album = track.getJSONObject("album");
@@ -301,10 +319,14 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             //disable album art on touch rotation
             MainFragment.allowAlbumImageRoation = false;
 
-            //we make a random default color
+            Bitmap blured = Blur.fastblur(bmImage.getContext(), result, 25);
+            Drawable d = new BitmapDrawable(bmImage.getContext().getResources(), blured);
+            MainFragment.lLayout.setBackgroundDrawable(d);
+
+            /*//we make a random default color
             Random rand = new Random();
             int r = rand.nextInt();
-            int g = rand.nextInt();
+            int g = rand.nextInt()
             int b = rand.nextInt();
             final int randomColor = Color.rgb(r, g, b);
 
@@ -314,7 +336,7 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                     // Do something with colors...
                     MainFragment.lLayout.getBackground().setColorFilter(palette.getVibrantColor(randomColor), PorterDuff.Mode.MULTIPLY);
                 }
-            });
+            });*/
 
 
         }

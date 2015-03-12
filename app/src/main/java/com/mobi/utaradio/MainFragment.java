@@ -262,7 +262,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void setTrackLiked(boolean liked) {
         if (liked) {
             //HANDLE ui colors
-            btnLike.setColorFilter(Color.CYAN, PorterDuff.Mode.MULTIPLY);
+            btnLike.setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
             btnDislike.setColorFilter(null);
             //we make a new rating object and set it as liked
             rating = new Rating(musicTitle.getText().toString(),

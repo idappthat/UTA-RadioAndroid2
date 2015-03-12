@@ -24,6 +24,8 @@ public class MusicService extends Service implements
     private final IBinder musicBind = new MusicBinder();
     private Intent broadcastIntent;
 
+    private boolean hasBeenPrepared = false;
+
     public static final String BROADCAST_ACTION = "com.mobi.utaradio.broadcast-action";
 
     public static final int ACTION_PREPARED = 0;
@@ -58,6 +60,7 @@ public class MusicService extends Service implements
     }
 
     public boolean isPlaying() { return player.isPlaying(); }
+    public boolean hasBeenPrepared() { return hasBeenPrepared; }
     public void pause() { player.pause(); }
     public void play() { player.start(); }
 
@@ -75,7 +78,7 @@ public class MusicService extends Service implements
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        Log.e("MUSIC", "Completed");
     }
 
     @Override
@@ -86,6 +89,7 @@ public class MusicService extends Service implements
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+        hasBeenPrepared = true;
         broadcastIntent.putExtra(BROADCAST_ACTION, ACTION_PREPARED);
         sendBroadcast(broadcastIntent);
     }
@@ -101,7 +105,6 @@ public class MusicService extends Service implements
     private void initMediaPlayer() {
         try {
             player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-            //player.set
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.setDataSource("rtsp://webmedia-2.uta.edu:1935/uta_radio/live");
             player.prepareAsync(); //Built-in media player AsyncTask
