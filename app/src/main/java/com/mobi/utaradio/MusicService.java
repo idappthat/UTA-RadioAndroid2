@@ -20,6 +20,9 @@ public class MusicService extends Service implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener {
 
+
+    public static final String OPEN_FORGROUND_ACTIVITY = "OPEN_FORGROUND_ACTIVITY";
+
     private MediaPlayer player;
     private final IBinder musicBind = new MusicBinder();
     private Intent broadcastIntent;
@@ -44,11 +47,15 @@ public class MusicService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //Notification rolls in on the start
+        //*
         Notification notification = new Notification(R.drawable.ic_launcher,
                 "UTA Radio is currently playing...", System.currentTimeMillis());
 
+        Intent innerIntent = new Intent(this, MainActivity.class);
+        innerIntent.setAction(OPEN_FORGROUND_ACTIVITY);
+
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+                innerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         //Set dropdown content
         notification.setLatestEventInfo(this,
@@ -56,6 +63,7 @@ public class MusicService extends Service implements
 
         startForeground(1, notification);
 
+        /**/
         return super.onStartCommand(intent, flags, startId);
     }
 

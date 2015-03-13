@@ -9,11 +9,8 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -116,6 +113,29 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         return rootView;
     }
+
+//    void showNotifications(){
+//        Intent intent = new Intent(this, NotificationReceiver.class);
+//        PendingIntent pIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
+//
+//
+//        Notification n  = new Notification.Builder(getActivity())
+//                .setContentTitle("New mail from " + "test@gmail.com")
+//                .setContentText("Subject")
+//                .setSmallIcon(R.drawable.ic_launcher)
+//                .setContentIntent(pIntent)
+//                .setAutoCancel(true)
+//                .addAction(R.drawable.ic_launcher, "STOP", pIntent)
+//                .addAction(R.drawable.ic_launcher, "EXIT", pIntent)
+//                .addAction(R.drawable.ic_launcher, "And more", pIntent).build();
+//
+//
+//        NotificationManager notificationManager =
+//                (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//        notificationManager.notify(0, n);
+//
+//    }
 
     @Override
     public void onStart() {
@@ -246,7 +266,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onDestroy() {
-        getActivity().stopService(playIntent);
+        if(playIntent != null){
+        getActivity().stopService(playIntent);}
         musicService = null;
         super.onDestroy();
     }
