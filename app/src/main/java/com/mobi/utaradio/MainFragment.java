@@ -114,29 +114,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         return rootView;
     }
 
-//    void showNotifications(){
-//        Intent intent = new Intent(this, NotificationReceiver.class);
-//        PendingIntent pIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
-//
-//
-//        Notification n  = new Notification.Builder(getActivity())
-//                .setContentTitle("New mail from " + "test@gmail.com")
-//                .setContentText("Subject")
-//                .setSmallIcon(R.drawable.ic_launcher)
-//                .setContentIntent(pIntent)
-//                .setAutoCancel(true)
-//                .addAction(R.drawable.ic_launcher, "STOP", pIntent)
-//                .addAction(R.drawable.ic_launcher, "EXIT", pIntent)
-//                .addAction(R.drawable.ic_launcher, "And more", pIntent).build();
-//
-//
-//        NotificationManager notificationManager =
-//                (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-//
-//        notificationManager.notify(0, n);
-//
-//    }
-
     @Override
     public void onStart() {
         super.onStart();
@@ -186,7 +163,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.music_play_imagebutton:
                 v.startAnimation(jump); //make the view jump
-                Log.e("TEST", " " + musicService.isPlaying());
                 if (musicService.isPlaying()) {
                     //pause + change button image to pause
                     musicService.pause();
@@ -267,8 +243,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroy() {
         if(playIntent != null){
-        getActivity().stopService(playIntent);}
-        musicService = null;
+            getActivity().stopService(playIntent);
+            getActivity().unbindService(musicConnection);
+        }
         super.onDestroy();
     }
 
@@ -315,6 +292,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
      * It published the data in the Rating Object
      */
     static void publishRating(){
+        Log.e("RATING", "rating my nigg");
         if(rating != null && rating.isFilled())
         {
             Log.d("DEBUG", "I am rating a song");

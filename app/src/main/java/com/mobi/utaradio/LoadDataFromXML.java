@@ -1,5 +1,6 @@
 package com.mobi.utaradio;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -219,18 +220,9 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
         @Override
         protected String doInBackground(String... params) {
-            Log.e("", "");
             String doc = null;
             String track = params[0];
             String artist = params[1];
-
-            /*if (track != null) {
-                track = track.replace(" ", "%20");
-            }
-            if (artist != null) {
-                artist = artist.replace(" ", "%20");
-            }
-            Log.d("DEBUG", track + artist);*/
 
             try {
                 Uri builder = new Uri.Builder()
@@ -245,7 +237,6 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
 
                 String url = builder.toString();
-                Log.e("CHECK", url);
                 doc = downloadDocumentFromInternet(url);
             } catch (Exception e) {
                 Log.e("ALBUM ART", "Error in getArtData: " + e.toString());
@@ -255,8 +246,6 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
         @Override
         protected void onPostExecute(String result) {
-            //parse json file
-            Log.d("ON RESULT", result + " -test");
             try {
                 //we parse the data here
                // Log.e("Result", result);
@@ -277,15 +266,9 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 //Enable on touch rotation of the album art
                 MainFragment.allowAlbumImageRoation = true;
 
-                //we make a random default color
-                Random rand = new Random();
-                int r = rand.nextInt();
-                int g = rand.nextInt();
-                int b = rand.nextInt();
-                final int randomColor = Color.rgb(r, g, b);
-
                 //adding a random hue to background
-                MainFragment.lLayout.getBackground().setColorFilter(randomColor, PorterDuff.Mode.MULTIPLY);
+                Resources res = MainFragment.lLayout.getContext().getResources();
+                MainFragment.lLayout.setBackgroundDrawable(res.getDrawable(R.drawable.album_blur_original));
             }
         }
     }
@@ -322,23 +305,6 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             Bitmap blured = Blur.fastblur(bmImage.getContext(), result, 25);
             Drawable d = new BitmapDrawable(bmImage.getContext().getResources(), blured);
             MainFragment.lLayout.setBackgroundDrawable(d);
-
-            /*//we make a random default color
-            Random rand = new Random();
-            int r = rand.nextInt();
-            int g = rand.nextInt()
-            int b = rand.nextInt();
-            final int randomColor = Color.rgb(r, g, b);
-
-            //get image color and apply it to the background
-            Palette.generateAsync(result, new Palette.PaletteAsyncListener() {
-                public void onGenerated(Palette palette) {
-                    // Do something with colors...
-                    MainFragment.lLayout.getBackground().setColorFilter(palette.getVibrantColor(randomColor), PorterDuff.Mode.MULTIPLY);
-                }
-            });*/
-
-
         }
     }
 }

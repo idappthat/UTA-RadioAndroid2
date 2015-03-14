@@ -59,7 +59,7 @@ public class MusicService extends Service implements
 
         //Set dropdown content
         notification.setLatestEventInfo(this,
-                "Artist - Song", "UTA Radio is currently playing...", contentIntent);
+                "UTA Radio", "UTA Radio is currently playing..", contentIntent);
 
         startForeground(1, notification);
 
