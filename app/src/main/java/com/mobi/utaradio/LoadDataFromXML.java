@@ -1,5 +1,6 @@
 package com.mobi.utaradio;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,6 +43,13 @@ import android.util.Log;
 
 import android.widget.ImageView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.Volley;
 import com.mobi.utaradio.util.Blur;
 
 /**
@@ -92,7 +100,9 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             //debug info
             Log.d("USER", "We got song: " + song + " by: " + artist);
             //get a new album image
-            new getArtData().execute(song, artist);
+            //new getArtData().execute(song, artist, album);
+            retrieveAlbumArt(MainFragment.musicTitle.getContext(), getArtURL(song, artist, album));
+
         } else {
             Log.e("USER", "No new data was acquired");
         }
@@ -185,92 +195,67 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
     }
 
+    private void retrieveAlbumArt(Context context, String url) {
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        JsonObjectRequest artRequest = new JsonObjectRequest(Request.Method.GET,
+                url, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                try {
+                    String url = jsonObject.get("url").toString();
+                    if(!url.equals("false")) {
+                        DownloadImageTask downloadImage = new DownloadImageTask(MainFragment.musicAlbumImage);
+                        downloadImage.execute(url);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e("JSON ERROR", "ERROR: " + e.toString());
+                    doAlbumArtErrors();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.e("ART API", "ERROR: " + volleyError.toString());
+                doAlbumArtErrors();
+            }
+        });
+
+        queue.add(artRequest);
+    }
+
     /**
-     * This class is used retrieve the album art for the song.
-     * We use last.fm API to get this info
+     * Get the URL to query Thad's Heroku app
      *
-     * @author zedd
+     * @author Cameron
      */
-    private class getArtData extends AsyncTask<String, Integer, String> {
+    private String getArtURL(String song, String artist, String album) {
+        Uri.Builder builder = new Uri.Builder()
+                .scheme("http")
+                .authority("album-art-engine.herokuapp.com")
+                .appendPath("getAA");
 
-
-        private String downloadDocumentFromInternet(String URL) throws Exception {
-            //making an http client
-            HttpClient httpClient = new DefaultHttpClient();
-            //making http post
-            HttpPost httpPost = new HttpPost(URL);
-            //making an http post request using httpClient and httpPost and saving that to httpResponse
-            HttpResponse httpResponse = httpClient.execute(httpPost);
-            //getting the entity from the response
-            HttpEntity httpEntity = httpResponse.getEntity();
-            //making an inputStram from response entity
-            InputStream inputStream = httpEntity.getContent();
-            //making an input stream reader, also called a BufferedReader
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            //String builder, Duh!
-            StringBuilder sb = new StringBuilder();
-
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");        //appending each line read to the string builder and adding the new line character at the end of each line
-            }
-            reader.close();        //closing the reader, good practice
-            return sb.toString();    //finally getting the string
+                /* Check for not null parameters */
+        if(song != null && artist != null) {
+            builder.appendQueryParameter("song_name", song);
+            builder.appendQueryParameter("artist_name", artist);
         }
+        if(album != null)
+            builder.appendQueryParameter("album_name", album);
 
-        @Override
-        protected String doInBackground(String... params) {
-            String doc = null;
-            String track = params[0];
-            String artist = params[1];
+        return builder.build().toString();
+    }
 
-            try {
-                Uri builder = new Uri.Builder()
-                        .scheme("http")
-                        .authority("ws.audioscrobbler.com")
-                        .appendPath("2.0")
-                        .appendQueryParameter("method", "track.getInfo")
-                        .appendQueryParameter("api_key", "7f8d036638619be79d49391d8dbe2d11")
-                        .appendQueryParameter("artist", artist)
-                        .appendQueryParameter("track", track)
-                        .appendQueryParameter("format", "json").build();
+    private void doAlbumArtErrors() {
+        MainFragment.musicAlbumImage.setImageResource(R.drawable.vinyl_records);
+        //Enable on touch rotation of the album art
+        MainFragment.allowAlbumImageRoation = true;
 
-
-                String url = builder.toString();
-                doc = downloadDocumentFromInternet(url);
-            } catch (Exception e) {
-                Log.e("ALBUM ART", "Error in getArtData: " + e.toString());
-            }
-            return doc;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            try {
-                //we parse the data here
-               // Log.e("Result", result);
-                JSONObject json = new JSONObject(result);
-                JSONObject track = json.getJSONObject("track");
-                JSONObject album = track.getJSONObject("album");
-                JSONArray image = album.getJSONArray("image");
-                JSONObject thirdImage = image.getJSONObject(image.length() - 1);  //always get the last image
-                String imageURL = thirdImage.get("#text").toString();
-                Log.d("DEBUG", imageURL);
-                DownloadImageTask downloadImage = new DownloadImageTask(MainFragment.musicAlbumImage);
-                downloadImage.execute(imageURL);
-            } catch (JSONException e) {
-                Log.d("DEBUG", e.toString());
-                //something went wrong
-                //set the album art to the vinyl image
-                MainFragment.musicAlbumImage.setImageResource(R.drawable.vinyl_records);
-                //Enable on touch rotation of the album art
-                MainFragment.allowAlbumImageRoation = true;
-
-                //adding a random hue to background
-                Resources res = MainFragment.lLayout.getContext().getResources();
-                MainFragment.lLayout.setBackgroundDrawable(res.getDrawable(R.drawable.album_blur_original));
-            }
-        }
+        //adding a random hue to background
+        Resources res = MainFragment.lLayout.getContext().getResources();
+        MainFragment.lLayout.setBackgroundDrawable(res.getDrawable(R.drawable.album_blur_original));
     }
 
 
