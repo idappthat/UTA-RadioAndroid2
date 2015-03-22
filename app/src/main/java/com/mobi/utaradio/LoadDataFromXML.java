@@ -4,24 +4,16 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.net.URL;
 
@@ -32,13 +24,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Random;
 
-
-import android.support.v7.graphics.Palette;
 import android.util.Log;
 
 import android.widget.ImageView;
@@ -48,7 +35,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.mobi.utaradio.util.Blur;
 
@@ -61,7 +47,14 @@ import com.mobi.utaradio.util.Blur;
 public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
 
     //the xmlParser saves all its data on the content handler, thats where we're getting it from
+    private MainFragment mainFragment;
+    private Context context;
     private HandlingXMLStuff hxl;
+
+    public LoadDataFromXML(Context context, MainFragment fragment){
+        this.context = context;
+        this.mainFragment = fragment;
+    }
 
     @Override
     protected String doInBackground(String... url) {
@@ -71,6 +64,9 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
         return "";    //dummy return
     }
 
+    private String currentSong = "";
+    static String currentArtist = "";
+    static String currentAlbum = "";
     @Override
     protected void onPostExecute(String result) {
         String song = hxl.getSong();
@@ -79,29 +75,34 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
         boolean getNewData = false;
 
         //check if data is different, then get the album art
-        if (song != null && MainFragment.musicTitle.getText()!= null && !song.equals(MainFragment.musicTitle.getText().toString())) {
+        if (song != null && mainFragment.musicTitle.getText()!= null && !song.equals(mainFragment.musicTitle.getText().toString())) {
             getNewData = true;
-        } else if (artist != null && MainFragment.musicArtist.getText()!= null && !artist.equals(MainFragment.musicArtist.getText().toString())) {
+        } else if (artist != null && mainFragment.musicArtist.getText()!= null && !artist.equals(mainFragment.musicArtist.getText().toString())) {
             getNewData = true;
-        } else if (album != null && MainFragment.musicAlbum.getText()!= null && !album.equals(MainFragment.musicAlbum.getText().toString())) {
+        } else if (album != null && mainFragment.musicAlbum.getText()!= null && !album.equals(mainFragment.musicAlbum.getText().toString())) {
             getNewData = true;
         }
 
         if (getNewData) { //ok we got a new song
 
+            //we update current songs
+            currentSong = song;
+            currentArtist = artist;
+            currentAlbum = album;
+
             //we publish the rating to the data base
-            MainFragment.publishRating();
+            mainFragment.publishRating();
             //reset the like status
-            MainFragment.resetTrackLiked();
+            mainFragment.resetTrackLiked();
             //set to the new values
-            MainFragment.musicTitle.setText(song);
-            MainFragment.musicArtist.setText(artist);
-            MainFragment.musicAlbum.setText(album);
+            mainFragment.musicTitle.setText(song);
+            mainFragment.musicArtist.setText(artist);
+            mainFragment.musicAlbum.setText(album);
             //debug info
             Log.d("USER", "We got song: " + song + " by: " + artist);
             //get a new album image
             //new getArtData().execute(song, artist, album);
-            retrieveAlbumArt(MainFragment.musicTitle.getContext(), getArtURL(song, artist, album));
+            retrieveAlbumArt(context, getArtURL(song, artist, album));
 
         } else {
             Log.e("USER", "No new data was acquired");
@@ -205,8 +206,8 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             public void onResponse(JSONObject jsonObject) {
                 try {
                     String url = jsonObject.get("url").toString();
-                    if(!url.equals("false")) {
-                        DownloadImageTask downloadImage = new DownloadImageTask(MainFragment.musicAlbumImage);
+                    if (!url.equals("false")) {
+                        DownloadImageTask downloadImage = new DownloadImageTask(mainFragment.musicAlbumImage);
                         downloadImage.execute(url);
                     }
                 } catch (JSONException e) {
@@ -238,24 +239,24 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 .appendPath("getAA");
 
                 /* Check for not null parameters */
-        if(song != null && artist != null) {
+        if (song != null && artist != null) {
             builder.appendQueryParameter("song_name", song);
             builder.appendQueryParameter("artist_name", artist);
         }
-        if(album != null)
+        if (album != null)
             builder.appendQueryParameter("album_name", album);
 
         return builder.build().toString();
     }
 
     private void doAlbumArtErrors() {
-        MainFragment.musicAlbumImage.setImageResource(R.drawable.album);
+        mainFragment.musicAlbumImage.setImageResource(R.drawable.album);
         //Enable on touch rotation of the album art
-        MainFragment.allowAlbumImageRoation = true;
+        mainFragment.allowAlbumImageRoation = true;
 
         //adding a random hue to background
-        Resources res = MainFragment.lLayout.getContext().getResources();
-        MainFragment.lLayout.setBackgroundDrawable(res.getDrawable(R.drawable.bg));
+        Resources res = mainFragment.lLayout.getContext().getResources();
+        mainFragment.lLayout.setBackgroundDrawable(res.getDrawable(R.drawable.bg));
     }
 
 
@@ -285,11 +286,11 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             //set the background to the new color
 
             //disable album art on touch rotation
-            MainFragment.allowAlbumImageRoation = false;
+            mainFragment.allowAlbumImageRoation = false;
 
             Bitmap blured = Blur.fastblur(bmImage.getContext(), result, 25);
             Drawable d = new BitmapDrawable(bmImage.getContext().getResources(), blured);
-            MainFragment.lLayout.setBackgroundDrawable(d);
+            mainFragment.lLayout.setBackgroundDrawable(d);
         }
     }
 }

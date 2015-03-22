@@ -29,7 +29,6 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -42,27 +41,27 @@ import java.util.TimerTask;
 public class MainFragment extends Fragment implements View.OnClickListener {
 
     /* Service Stuff */
-    private static MusicService musicService;
+    private MusicService musicService;
     private Intent playIntent;
     private boolean musicBound = false;
-
+    private boolean viewSwitched = false;
 
     private Typeface quicksand;
-    static TextView musicTitle, musicArtist, musicAlbum;
-    static ImageView musicAlbumImage;
+    public TextView musicTitle, musicArtist, musicAlbum;
+    public ImageView musicAlbumImage;
     private ImageButton btnPlay, btnShare;
-    static ImageButton btnLike, btnDislike;
-    static LinearLayout lLayout;
+    private ImageButton btnLike, btnDislike;
+    public LinearLayout lLayout;
     private ViewSwitcher viewSwitcher;
 
     private Timer myTimer;
     private Animation jump; //This is a simple jump animation, gives nice feedback
 
-    static boolean allowAlbumImageRoation = true;    // THIS ALLOWS ROTATION OF THE ALBUM ART
+    public boolean allowAlbumImageRoation = true;    // THIS ALLOWS ROTATION OF THE ALBUM ART
     private Animation rotationAnimation;    //record rotation animation
 
     //this is used to contain rating information
-    static Rating rating;       //it needs to be static
+    private Rating rating;       //it needs to be static
 
     public MainFragment() {
     }
@@ -118,7 +117,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onStart() {
         super.onStart();
 
-        if(playIntent == null) {
+        if (playIntent == null) {
             playIntent = new Intent(getActivity().getBaseContext(), MusicService.class);
             getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             getActivity().startService(playIntent);
@@ -151,7 +150,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         switch (action) {
             case MusicService.ACTION_PREPARED:
                 btnPlay.setImageResource(R.drawable.pause);
-                viewSwitcher.showNext();
+                showPlayButton();
                 break;
         }
 
@@ -178,12 +177,35 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             case R.id.music_like_imagebutton:
                 v.startAnimation(jump); //make the view jump
                 //Toast.makeText(v.getContext(), "Like", Toast.LENGTH_SHORT).show();
-                setTrackLiked(true);
+                if(rating != null)
+                {
+                    if(rating.getRating() == 1)
+                    {
+                        resetTrackLiked();
+                        rating.reset();
+                    } else {
+                        setTrackLiked(true);
+                    }
+                } else {
+                    setTrackLiked(true);
+                }
+
                 break;
             case R.id.music_dislike_imagebutton:
                 v.startAnimation(jump); //make the view jump
-                //Toast.makeText(v.getContext(), "Dislike", Toast.LENGTH_SHORT).show();
-                setTrackLiked(false);
+
+                if(rating != null)
+                {
+                    if(rating.getRating() == -1)
+                    {
+                        resetTrackLiked();
+                        rating.reset();
+                    } else {
+                        setTrackLiked(false);
+                    }
+                } else {
+                    setTrackLiked(false);
+                }
                 break;
             case R.id.music_share_imagebutton:
                 String message = "Yo dawg, check out these mad beats!";
@@ -218,16 +240,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }, 0, 10000);
         } else {
             // we kill the current timer
-           if(myTimer != null) {
-               myTimer.cancel();
-               myTimer.purge();
-               myTimer = null;
-           }
+            if (myTimer != null) {
+                myTimer.cancel();
+                myTimer.purge();
+                myTimer = null;
+            }
         }
     }
 
     @Override
     public void onPause() {
+        Log.d("DEBUG", "i WAS PAUSED");
         enableLoadingContent(false);
         getActivity().unregisterReceiver(broadcastReceiver);
         super.onPause();
@@ -235,14 +258,30 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onResume() {
+        Log.d("DEBUG", "i WAS RESUMED");
         enableLoadingContent(true);
         getActivity().registerReceiver(broadcastReceiver, new IntentFilter(MusicService.BROADCAST_ACTION));
+        if (musicBound) {
+            Log.d("DEBUG", "MusicService is Bound");
+            if (musicService != null && musicService.isPlaying()) {
+                btnPlay.setImageResource(R.drawable.pause); //we set the image of the next state
+            } else {
+                btnPlay.setImageResource(R.drawable.play); //we set the image of the next state
+            }
+        }
         super.onResume();
+    }
+
+    void showPlayButton() {
+        if (!viewSwitched) {
+            viewSwitcher.showNext();
+            viewSwitched = true;
+        }
     }
 
     @Override
     public void onDestroy() {
-        if(playIntent != null){
+        if (playIntent != null) {
             getActivity().stopService(playIntent);
             getActivity().unbindService(musicConnection);
         }
@@ -250,11 +289,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     void updateSongInfo() {
-        new LoadDataFromXML().execute("http://radio.uta.edu/_php/nowplaying.php");
+        LoadDataFromXML loader = new LoadDataFromXML(getActivity(), this);
+        loader.execute("http://radio.uta.edu/_php/nowplaying.php");
     }
 
     /**
      * We add a the liked music to a list and we increment a counter of the like music
+     *
      * @param liked a boolean value
      */
     public void setTrackLiked(boolean liked) {
@@ -264,8 +305,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             btnDislike.setColorFilter(null);
             //we make a new rating object and set it as liked
             rating = new Rating(musicTitle.getText().toString(),
-                                musicArtist.getText().toString(),
-                                Rating.LIKED);
+                    musicArtist.getText().toString(),
+                    Rating.LIKED);
         } else {
             //HANDLE ui colors
             btnDislike.setColorFilter(Color.parseColor("#D0021D"), PorterDuff.Mode.MULTIPLY);
@@ -280,9 +321,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     /*
     this is purely cosmetic, removes the color filter from the buttons
  */
-    static void resetTrackLiked(){
+    public void resetTrackLiked() {
         btnDislike.setColorFilter(null);
         btnLike.setColorFilter(null);
+        publishRating();
     }
 
     /**
@@ -291,10 +333,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
      * Called only when new songName and artistName is obtained
      * It published the data in the Rating Object
      */
-    static void publishRating(){
-        Log.e("RATING", "rating my nigg");
-        if(rating != null && rating.isFilled())
-        {
+    public void publishRating() {
+        if (rating != null && rating.isFilled()) {
             Log.d("DEBUG", "I am rating a song");
             ParseQuery<ParseObject> query = ParseQuery.getQuery("Ratings");
             query.whereEqualTo("songName", rating.getSongName());
@@ -302,17 +342,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             query.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> parseObjects, ParseException e) {
-                    if(e == null)
-                    {
-                        if(parseObjects.isEmpty()){
+                    if (e == null) {
+                        if (parseObjects.isEmpty()) {
                             //ok object is NOT already in the database
                             //we make a new object
                             //rating is ready to be published
                             ParseObject songRating = new ParseObject("Ratings");
-                            if(rating.getSongName() != null){
+                            if (rating.getSongName() != null) {
                                 songRating.put("songName", rating.getSongName());
                             }
-                            if(rating.getArtistName() != null){
+                            if (rating.getArtistName() != null) {
                                 songRating.put("artistName", rating.getArtistName());
                             }
                             songRating.increment("rating", rating.getRating());
