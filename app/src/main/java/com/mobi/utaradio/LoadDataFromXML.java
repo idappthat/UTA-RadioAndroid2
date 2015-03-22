@@ -249,13 +249,13 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
     }
 
     private void doAlbumArtErrors() {
-        MainFragment.musicAlbumImage.setImageResource(R.drawable.vinyl_records);
+        MainFragment.musicAlbumImage.setImageResource(R.drawable.album);
         //Enable on touch rotation of the album art
         MainFragment.allowAlbumImageRoation = true;
 
         //adding a random hue to background
         Resources res = MainFragment.lLayout.getContext().getResources();
-        MainFragment.lLayout.setBackgroundDrawable(res.getDrawable(R.drawable.album_blur_original));
+        MainFragment.lLayout.setBackgroundDrawable(res.getDrawable(R.drawable.bg));
     }
 
 
@@ -274,7 +274,7 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
                 image = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
                 Log.e("DEBUG", e.getMessage());
-                bmImage.setImageResource(R.drawable.vinyl_records);
+                bmImage.setImageResource(R.drawable.album);
             }
             return image;
         }
