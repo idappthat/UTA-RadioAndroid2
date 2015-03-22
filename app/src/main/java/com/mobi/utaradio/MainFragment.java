@@ -177,10 +177,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             case R.id.music_like_imagebutton:
                 v.startAnimation(jump); //make the view jump
                 //Toast.makeText(v.getContext(), "Like", Toast.LENGTH_SHORT).show();
-                if(rating != null)
-                {
-                    if(rating.getRating() == 1)
-                    {
+                if (rating != null) {
+                    if (rating.getRating() == 1) {
                         resetTrackLiked();
                         rating.reset();
                     } else {
@@ -193,10 +191,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.music_dislike_imagebutton:
                 v.startAnimation(jump); //make the view jump
-                if(rating != null)
-                {
-                    if(rating.getRating() == -1)
-                    {
+                if (rating != null) {
+                    if (rating.getRating() == -1) {
                         resetTrackLiked();
                         rating.reset();
                     } else {
@@ -207,7 +203,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 }
                 break;
             case R.id.music_share_imagebutton:
-                String message = "Yo dawg, check out these mad beats!";
+                String song = (musicTitle.getText().toString() != null ) ? musicTitle.getText().toString() : "";
+                String artist = (musicArtist.getText().toString() != null ) ? musicArtist.getText().toString() : "";
+
+                String message = "Hey I am listening to " + song + " by " + artist + " on UTA Radio." +
+                        " \n Download UTA Radio Android App here: https://play.google.com/store/apps/details?id=com.mobi.utaradio&hl=en";
                 String contextTitle = "Select app to share";
 
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
@@ -230,6 +230,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
      */
     public void enableLoadingContent(boolean enabled) {
         if (enabled) { //we make a new timer
+            if (myTimer != null) {
+                myTimer.cancel();
+                myTimer.purge();
+                myTimer = null;
+            }
+
             myTimer = new Timer();
             myTimer.schedule(new TimerTask() {
                 @Override
