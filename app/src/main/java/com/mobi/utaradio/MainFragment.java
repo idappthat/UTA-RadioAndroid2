@@ -193,7 +193,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.music_dislike_imagebutton:
                 v.startAnimation(jump); //make the view jump
-
                 if(rating != null)
                 {
                     if(rating.getRating() == -1)

@@ -291,6 +291,7 @@ public class LoadDataFromXML extends AsyncTask<String, Integer, String> {
             Bitmap blured = Blur.fastblur(bmImage.getContext(), result, 25);
             Drawable d = new BitmapDrawable(bmImage.getContext().getResources(), blured);
             mainFragment.lLayout.setBackgroundDrawable(d);
+
         }
     }
 }
