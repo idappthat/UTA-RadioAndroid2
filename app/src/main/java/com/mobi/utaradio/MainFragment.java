@@ -42,7 +42,7 @@ import java.util.TimerTask;
 public class MainFragment extends Fragment implements View.OnClickListener {
 
     /* Service Stuff */
-    private MusicService musicService;
+    private static MusicService musicService;
     private Intent playIntent;
     private boolean musicBound = false;
 
