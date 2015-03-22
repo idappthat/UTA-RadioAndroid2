@@ -265,8 +265,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             Log.d("DEBUG", "MusicService is Bound");
             if (musicService != null && musicService.isPlaying()) {
                 btnPlay.setImageResource(R.drawable.pause); //we set the image of the next state
+                showPlayButton();
             } else {
                 btnPlay.setImageResource(R.drawable.play); //we set the image of the next state
+                showPlayButton();
             }
         }
         super.onResume();
