@@ -69,8 +69,8 @@ public class MusicService extends Service implements
 
     public boolean isPlaying() { return player.isPlaying(); }
     public boolean hasBeenPrepared() { return hasBeenPrepared; }
-    public void pause() { player.pause(); }
-    public void play() { player.start(); }
+    public void pause() { player.pause(); player.setVolume(0, 0); }
+    public void play() { player.start(); player.setVolume(1, 1); }
 
     @Override
     public IBinder onBind(Intent intent) {

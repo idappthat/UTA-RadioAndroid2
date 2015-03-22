@@ -260,7 +260,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void setTrackLiked(boolean liked) {
         if (liked) {
             //HANDLE ui colors
-            btnLike.setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+            btnLike.setColorFilter(Color.parseColor("#417505"), PorterDuff.Mode.MULTIPLY);
             btnDislike.setColorFilter(null);
             //we make a new rating object and set it as liked
             rating = new Rating(musicTitle.getText().toString(),
@@ -268,7 +268,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                 Rating.LIKED);
         } else {
             //HANDLE ui colors
-            btnDislike.setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+            btnDislike.setColorFilter(Color.parseColor("#D0021D"), PorterDuff.Mode.MULTIPLY);
             btnLike.setColorFilter(null);
             //we make a new rating object and set it as disliked
             rating = new Rating(musicTitle.getText().toString(),
